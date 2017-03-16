@@ -87,6 +87,12 @@ router.get('/posts/:post', function(req, res, next) {
 	})
 })
 
+// router.get('/posts/:post/detail', function(req, res, next) {
+// 	req.post.populate('comments', function(err, post) {
+// 		res.json(post)
+// 	})
+// })
+
 router.put('/posts/:post/update', auth, function(req, res, next) {
 	Post.update(req.post, req.body, {}, function(err, post) {
 		if (err) {

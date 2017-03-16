@@ -46,20 +46,6 @@ app.config(['$stateProvider', '$urlRouterProvider',
 				],
 			},
 		})
-		.state('afterUpdate', {
-			url: '/posts/:id/update',
-			templateUrl: '/postUpdate.html',
-			controller: 'AuthCtrl',
-			resolve: {
-				post: ['auth', '$state',
-					function(auth, $state) {
-						if (auth.isLoggedIn()) {
-							$state.go('showPost')
-						}
-					},
-				],
-			},
-		})
 		.state('showPost', {
 			url: '/posts/:id/detail',
 			templateUrl: '/postDetail.html',
@@ -75,6 +61,21 @@ app.config(['$stateProvider', '$urlRouterProvider',
 				],
 			},
 		})
+		// .state('afterUpdate', {
+		// 	url: '/posts/:id/detail',
+		// 	templateUrl: '/postDetail.html',
+		// 	controller: 'PostsCtrl',
+		// 	resolve: {
+		// 		post: ['$stateParams', 'posts', 'auth', '$state',
+		// 			function($stateParams, posts, auth, $state) {
+		// 				if (auth.isLoggedIn()) {
+		// 					return posts.afterUpdate($stateParams.id)
+		// 				}
+		// 				$state.go('login')
+		// 			},
+		// 		],
+		// 	},
+		// })
 		.state('login', {
 			url: '/login',
 			templateUrl: '/login.html',
@@ -205,6 +206,12 @@ app.factory('posts', ['$http', 'auth',
 			})
 		}
 
+		// o.afterUpdate = function(post) {
+		// 	return $http.get('/posts/' + post._id + '/detail').then(function(res) {
+		// 		return res.data
+		// 	})
+		// }
+
 		o.delete = function(id) {
 			return $http.delete('/posts/' + id + '/delete', {
 				headers: {
@@ -223,7 +230,6 @@ app.factory('posts', ['$http', 'auth',
 				},
 			}).success(function(data) {
 				console.log('data:', data)
-				return o.get(id)
 			})
 		}
 
@@ -298,8 +304,8 @@ app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 	},
 ])
 
-app.controller('PostsCtrl', ['$scope', 'posts', 'post', 'auth',
-	function($scope, posts, post, auth) {
+app.controller('PostsCtrl', ['$scope', '$state', 'posts', 'post', 'auth',
+	function($scope, $state, posts, post, auth) {
 		$scope.posts = posts.posts
 		$scope.post = post
 		$scope.isLoggedIn = auth.isLoggedIn
@@ -322,6 +328,8 @@ app.controller('PostsCtrl', ['$scope', 'posts', 'post', 'auth',
 				title: $scope.post.title,
 				link: $scope.post.link,
 				contents: $scope.post.contents,
+			}).then(function() {
+				$state.go('plist')
 			})
 		}
 

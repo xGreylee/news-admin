@@ -1,0 +1,296 @@
+<html>
+<head>
+  <title>News-Admin</title>
+  <link href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet">
+  <link href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+  <link href="http://cdn.bootcss.com/angularjs-toaster/2.1.0/toaster.css" rel="stylesheet">
+
+  <script src="http://cdn.bootcss.com/angular.js/1.5.10/angular.js"></script>
+  <script src="http://cdn.bootcss.com/angular.js/1.5.10/angular-animate.js"></script>
+  <script src="http://cdn.bootcss.com/angular.js/1.5.10/angular-touch.js"></script>
+  <script src="http://cdn.bootcss.com/angular.js/1.5.10/angular-sanitize.js"></script>
+  <script src="http://cdn.bootcss.com/angular-messages/1.5.10/angular-messages.js"></script>
+  <script src="http://cdn.bootcss.com/angular-ui-router/0.4.2/angular-ui-router.js"></script>
+  <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.js"></script>
+  <script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.js"></script>
+  <script src="http://cdn.bootcss.com/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.js"></script>
+  <script src="http://cdn.bootcss.com/angularjs-toaster/2.1.0/toaster.js"></script>
+
+  <script src="javascripts/angularApp.js"></script>
+  <style> .glyphicon-thumbs-up { cursor:pointer } </style>
+</head>
+<body ng-app="news-admin">
+  <div class="header">
+    <h1>News-Admin</h1>
+  </div>
+  <nav class="navbar navbar-default pull-right" ng-controller="NavCtrl">
+    <ul class="nav navbar-nav">
+      <li ng-show="isLoggedIn()"><a>{{ currentUser() }}</a></li>
+      <li ng-show="isLoggedIn()"><a href="" ng-click="logOut()">注销</a></li>
+      <li ng-hide="isLoggedIn()"><a href="/#/login">登录</a></li>
+      <li ng-hide="isLoggedIn()"><a href="/#/register">注册</a></li>
+    </ul>
+  </nav>
+  
+  <div class="row">
+    <div class="col-md-2" style="background-color:lightgrey;text-align:center;height:89%;">
+      <h2>导航栏</h2>
+      <div ng-controller="AccordionDemoCtrl">
+        <uib-accordion close-others="oneAtATime">
+          <div uib-accordion-group class="panel-default" is-open="status.open">
+            <uib-accordion-heading>
+              主页 <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+            </uib-accordion-heading>
+            <a href="/#/home" style="font-size:18px;text-align: center">欢迎页面</a>
+          </div>
+          <div uib-accordion-group class="panel-default">
+            <uib-accordion-heading>
+              新闻信息管理 <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+            </uib-accordion-heading>
+            <a href="/#/addPost" style="font-size:16px;text-align: center">添加新闻</a>
+            <hr>
+            <a href="/#/plist" style="font-size:16px;text-align: center">新闻列表</a>
+          </div>
+          <div uib-accordion-group class="panel-default">
+            <uib-accordion-heading>
+              评论信息管理 <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+            </uib-accordion-heading>
+            <a href="/#/" style="font-size:16px;text-align: center">评论列表</a>
+          </div>
+          <div uib-accordion-group class="panel-default">
+            <uib-accordion-heading>
+              个人信息管理 <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+            </uib-accordion-heading>
+            <a href="/#/" style="font-size:16px;text-align: center">个人信息</a><br>
+            <hr>
+            <a href="/#/" style="font-size:16px;text-align: center">修改密码</a>
+          </div>
+          <div uib-accordion-group class="panel-default">
+            <uib-accordion-heading>
+              栏目信息管理 <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+            </uib-accordion-heading>
+            <a href="/#/" style="font-size:16px;text-align: center">新闻分类</a><br>
+            <hr>
+            <a href="/#/" style="font-size:16px;text-align: center">栏目列表</a>
+          </div>
+        </uib-accordion>
+      </div>
+    </div>
+    <div class="col-md-6 col-md-offset-1">
+      <ui-view></ui-view>
+    </div>
+    <div class="footer">
+      CopyRight @xGreyLee
+    </div>
+  </div>
+  
+  <script type="text/ng-template" id="/home.html">
+    <div class="page-header">
+      <h2>Welcome to News-Admin</h2>
+    </div>
+
+    <div ng-hide="isLoggedIn()">
+      <h3>您需要 <a href="/#/login">登录</a> 或者 <a href="/#/register">注册</a> 才有权限进行新闻信息的管理</h3>
+    </div>
+  </script>
+
+  <script type="text/ng-template" id="/plist.html">
+    <div class="page-header">
+      <h2>新闻列表</h2>
+    </div>
+    <div class="row" style="margin-top:10px;" ng-repeat="post in posts | orderBy: '-upvotes'">
+      <span class="glyphicon glyphicon-thumbs-up" ng-click="upvote(post)"></span>
+        {{post.upvotes}}
+      <span class="glyphicon glyphicon-thumbs-down" ng-click="downvote(post)"></span>
+      <span style="font-size:20px;margin-left:20px">
+        <a ng-show="post.title" href="#/posts/{{post._id}}">
+          {{post.title}}
+        </a>
+        <span ng-show="post.author">
+          来自 <a>{{post.author}}</a>
+        </span>
+      </span>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="#/posts/{{post._id}}/detail" class="glyphicon glyphicon-comment"></a>
+          ({{post.comments.length}})
+       &nbsp;&nbsp;&nbsp;&nbsp;
+      <a class="glyphicon glyphicon-trash" ng-click="deletePost(post)"></a>
+    </div>
+
+    <div ng-hide="isLoggedIn()">
+      <h3>您需要 <a href="/#/login">登录</a> 或者 <a href="/#/register">注册</a> 才有权限进行新闻信息的管理</h3>
+    </div>
+  </script>
+
+  <script type="text/ng-template" id="/addPost.html">
+    <form name="add_form" ng-show="isLoggedIn()" style="margin-top:30px"  ng-submit="addPost()">
+      <h3>添加新闻:</h3>
+
+      <div class="form-group">
+        <input type="text" class="form-control" name="post_title" placeholder="Title"  ng-model="title" required>
+      </div>
+
+      <div ng-messages="add_form.post_title.$error" style="color:red" role="alert">
+        <div ng-message="required">新闻标题不能为空</div>
+      </div>
+
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Link" ng-model="link">
+      </div>
+
+      <div class="form-group">
+        <textarea rows="20" cols="50" name="post_contents" ng-model="contents" required></textarea>
+      </div>
+
+      <div ng-messages="add_form.post_contents.$error" style="color:red" role="alert">
+        <div ng-message="required">新闻内容不能为空</div>
+      </div>
+
+      <div ng-controller="toasterController">
+        <toaster-container toaster-options="{'close-button':false, 'animation-class': 'toast-center-right', 'position-class': 'toast-top-full-width'}"></toaster-container>
+        <button type="submit" class="btn btn-primary" ng-click="pop()">提交</button>
+      </div>
+    </form>
+  </script>
+
+  <script type="text/ng-template" id="/postUpdate.html">
+    <div class="page-header">
+      <h3>
+        编辑新闻：{{post.title}}
+      </h3>
+    </div>
+    <form class="form-horizontal" ng-show="isLoggedIn()" role="form" ng-submit="updatePost()">
+      <div class="form-group">
+        <label class="control-label col-sm-2" style="font-size:20px">标题:</label>
+        <div class="col-sm-10" style="margin-bottom: 20px">
+          <input type="text" class="form-control" ng-model="post.title"/>
+        </div>
+        <label class="control-label col-sm-2" style="font-size:20px">链接:</label>
+        <div class="col-sm-10" style="margin-bottom: 16px">
+          <input type="text" class="form-control" ng-model="post.link"/>
+        </div>
+        <br><br>
+        <label class="control-label col-sm-2" style="font-size:20px;padding-bottom: 20px;">内容:</label>
+        <div class="col-sm-10" style="padding-top: 20px">
+          <textarea cols="50" rows="20" ng-model="post.contents"></textarea>
+          <div ng-controller="toasterController">
+            <toaster-container toaster-options="{'close-button':false, 'animation-class': 'toast-center-right', 'position-class': 'toast-top-full-width'}"></toaster-container>
+            <button type="submit" style="float: right;" class="btn btn-primary" ng-click="pop()">修改</button>
+          </div>
+        </div>
+        <br><br>
+      </div>
+    </form>
+    
+    <div ng-repeat="comment in post.comments | orderBy:'-upvotes'">
+      <span class="glyphicon glyphicon-thumbs-up" ng-click="upvote(comment)"></span>
+        {{comment.upvotes}} 
+      <span class="glyphicon glyphicon-thumbs-down" ng-click="downvote(comment)"></span>
+        - by {{comment.author}}
+      <span style="font-size:20px; margin-left:10px;">
+        {{comment.body}}
+      </span>
+    </div>
+  </script>
+  
+  <script type="text/ng-template" id="/postDetail.html">
+    <div class="form-horizontal">
+      <div class="page-header">
+        <h3>
+          <center>
+          <a href="post.link" ng-show="post.link">
+            <span>{{post.title}}</span>
+          </a>
+          </center><br>
+          <span style="float: right;font-size: 20px;">--作者：{{post.author}}</span>
+        </h3>
+      </div>
+      <div style="word-break: break-all;">
+        &nbsp;&nbsp;&nbsp;&nbsp;<span>{{post.contents}}</span>
+      </div>
+    </div>
+
+    <div ng-repeat="comment in post.comments | orderBy:'-upvotes'">
+      <span class="glyphicon glyphicon-thumbs-up" ng-click="upvote(comment)"></span>
+        {{comment.upvotes}} 
+      <span class="glyphicon glyphicon-thumbs-down" ng-click="downvote(comment)"></span>
+      <span style="font-size:20px; margin-left:10px;">
+        {{comment.body}}
+      </span>
+      - by {{comment.author}}
+    </div>
+
+    <form ng-submit="addComment()" ng-show="isLoggedIn()" style="margin-top:30px;">
+      <h3>发表评论</h3>
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="请输入你的评论" ng-model="body"></input>
+      </div>
+      <button type="submit" class="btn btn-primary">评论</button>
+    </form>
+
+    <div ng-hide="isLoggedIn()">
+      <h3>评论之前你必须<a href="/#/login">登录</a> 或者 <a href="/#/register">注册</a> 了账号</h3>
+    </div>
+  </script>
+
+  <script type="text/ng-template" id="/register.html">
+    <div class="page-header">
+      <h1>News-Admin</h1>
+    </div>
+  
+    <div ng-show="error" class="alert alert-danger row">
+      <span>{{ error.message }}</span>
+    </div>
+  
+    <form ng-submit="register()"
+      style="margin-top:30px;">
+      <h3>Register</h3>
+  
+      <div class="form-group">
+        <input type="text"
+        class="form-control"
+        placeholder="Username"
+        ng-model="user.username"></input>
+      </div>
+      <div class="form-group">
+        <input type="password"
+        class="form-control"
+        placeholder="Password"
+        ng-model="user.password"></input>
+      </div>
+      <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+  </script>
+
+  <script type="text/ng-template" id="/login.html">
+    <div class="page-header">
+      <h1>News-Admin</h1>
+    </div>
+  
+    <div ng-show="error" class="alert alert-danger row">
+      <span>{{ error.message }}</span>
+    </div>
+  
+    <form ng-submit="logIn()"
+      style="margin-top:30px;">
+      <h3>Log In</h3>
+  
+      <div class="form-group">
+        <input type="text"
+        class="form-control"
+        placeholder="Username"
+        ng-model="user.username"></input>
+      </div>
+      <div class="form-group">
+        <input type="password"
+        class="form-control"
+        placeholder="Password"
+        ng-model="user.password"></input>
+      </div>
+      <button type="submit" class="btn btn-primary">Log In</button>
+    </form>
+  </script>
+
+  </body>
+</html>

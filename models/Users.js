@@ -8,6 +8,13 @@ var UserSchema = new mongoose.Schema({
 		lowercase: true,
 		unique: true
 	},
+	gender: {
+		type: String,
+	},
+	nickname: {
+		type: String,
+		unique: true
+	},
 	hash: String,
 	salt: String
 })

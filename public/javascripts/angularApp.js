@@ -110,11 +110,11 @@ app.factory('auth', ['$http', '$window',
 		const auth = {}
 
 		auth.saveToken = function(token) {
-			$window.localStorage['flapper-news-token'] = token
+			$window.localStorage['news-admin-token'] = token
 		}
 
 		auth.getToken = function() {
-			return $window.localStorage['flapper-news-token']
+			return $window.localStorage['news-admin-token']
 		}
 
 		auth.isLoggedIn = function() {
@@ -151,7 +151,7 @@ app.factory('auth', ['$http', '$window',
 		}
 
 		auth.logOut = function() {
-			$window.localStorage.removeItem('flapper-news-token')
+			$window.localStorage.removeItem('news-admin-token')
 		}
 
 		return auth

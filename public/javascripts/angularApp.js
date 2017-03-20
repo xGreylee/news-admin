@@ -61,21 +61,21 @@ app.config(['$stateProvider', '$urlRouterProvider',
 				],
 			},
 		})
-		// .state('afterUpdate', {
-		// 	url: '/posts/:id/detail',
-		// 	templateUrl: '/postDetail.html',
-		// 	controller: 'PostsCtrl',
-		// 	resolve: {
-		// 		post: ['$stateParams', 'posts', 'auth', '$state',
-		// 			function($stateParams, posts, auth, $state) {
-		// 				if (auth.isLoggedIn()) {
-		// 					return posts.afterUpdate($stateParams.id)
-		// 				}
-		// 				$state.go('login')
-		// 			},
-		// 		],
-		// 	},
-		// })
+		.state('personal', {
+			url: '/posts/:id/detail',
+			templateUrl: '/postDetail.html',
+			controller: 'PostsCtrl',
+			resolve: {
+				post: ['$stateParams', 'posts', 'auth', '$state',
+					function($stateParams, posts, auth, $state) {
+						if (auth.isLoggedIn()) {
+							return posts.get($stateParams.id)
+						}
+						$state.go('login')
+					},
+				],
+			},
+		})
 		.state('login', {
 			url: '/login',
 			templateUrl: '/login.html',
@@ -205,12 +205,6 @@ app.factory('posts', ['$http', 'auth',
 				return res.data
 			})
 		}
-
-		// o.afterUpdate = function(post) {
-		// 	return $http.get('/posts/' + post._id + '/detail').then(function(res) {
-		// 		return res.data
-		// 	})
-		// }
 
 		o.delete = function(id) {
 			return $http.delete('/posts/' + id + '/delete', {

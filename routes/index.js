@@ -87,12 +87,6 @@ router.get('/posts/:post', function(req, res, next) {
 	})
 })
 
-// router.get('/posts/:post/detail', function(req, res, next) {
-// 	req.post.populate('comments', function(err, post) {
-// 		res.json(post)
-// 	})
-// })
-
 router.put('/posts/:post/update', auth, function(req, res, next) {
 	Post.update(req.post, req.body, {}, function(err, post) {
 		if (err) {
@@ -164,6 +158,18 @@ router.put('/posts/:post/comments/:comment/downvote', auth, function(req, res, n
 	})
 })
 
+router.get('/toPersonal', function(req, res, next) {
+	var user = new User()
+
+	user.find(function(err, users) {
+		if (err) {
+			return next(err)
+		}
+
+		res.json(users)
+	})
+})
+
 router.post('/register', function(req, res, next) {
 	if (!req.body.username || !req.body.password) {
 		return res.status(400).json({
@@ -174,6 +180,9 @@ router.post('/register', function(req, res, next) {
 	var user = new User()
 
 	user.username = req.body.username
+	user.nickname = req.body.nickname
+	user.signs = req.body.signs
+	user.gender = req.body.gender
 
 	user.setPassword(req.body.password)
 

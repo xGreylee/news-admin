@@ -62,16 +62,15 @@ app.config(['$stateProvider', '$urlRouterProvider',
 			},
 		})
 		.state('personal', {
-			url: '/posts/:id/detail',
-			templateUrl: '/postDetail.html',
-			controller: 'PostsCtrl',
+			url: '/personal/:id',
+			templateUrl: '/personal.html',
+			controller: 'AuthCtrl',
 			resolve: {
-				post: ['$stateParams', 'posts', 'auth', '$state',
-					function($stateParams, posts, auth, $state) {
+				user: ['$stateParams', 'auth',
+					function($stateParams, auth) {
 						if (auth.isLoggedIn()) {
-							return posts.get($stateParams.id)
+							return auth.getInfo()
 						}
-						$state.go('login')
 					},
 				],
 			},
@@ -133,9 +132,19 @@ app.factory('auth', ['$http', '$window',
 			if (auth.isLoggedIn()) {
 				let token = auth.getToken()
 				let payload = JSON.parse($window.atob(token.split('.')[1]))
-
+				// console.log('payload:', payload)
 				return payload.username
 			}
+		}
+
+		auth.getInfo = function(payload) {
+			console.log('getInfo------>')
+			// let token = auth.getToken()
+			// let payload = JSON.parse($window.atob(token.split('.')[1]))
+			return $http.get('/personal/' + payload._id).success(function(res) {
+				console.log('res:', res)
+				return res.data
+			})
 		}
 
 		auth.register = function(user) {
@@ -340,7 +349,7 @@ app.controller('PostsCtrl', ['$scope', '$state', 'posts', 'post', 'auth',
 app.controller('AuthCtrl', ['$scope', '$state', 'auth',
 	function($scope, $state, auth) {
 		$scope.user = {}
-
+		// $scope.getUser = auth.getInfo(user)
 		$scope.register = function() {
 			auth.register($scope.user).error(function(error) {
 				$scope.error = error
@@ -352,7 +361,8 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth',
 		$scope.logIn = function() {
 			auth.logIn($scope.user).error(function(error) {
 				$scope.error = error
-			}).then(function() {
+			}).then(function(data) {
+				console.log('user data:', data)
 				$state.go('home')
 			})
 		}

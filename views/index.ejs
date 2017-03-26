@@ -71,7 +71,7 @@
               个人信息管理 <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
             </uib-accordion-heading>
             <span class="glyphicon glyphicon-user">
-              <a href="/#/" style="font-size:16px;text-align: center">个人信息</a><br>
+              <a href="/#/personal" style="font-size:16px;text-align: center">个人信息</a><br>
             </span>
             <hr>
             <span class="glyphicon glyphicon-asterisk">
@@ -93,7 +93,7 @@
         </uib-accordion>
       </div>
     </div>
-    <div class="col-md-6 col-md-offset-1">
+    <div class="col-md-8 col-md-offset-1">
       <ui-view></ui-view>
     </div>
     <div class="footer">
@@ -357,13 +357,12 @@
         </div>
         <label class="control-label col-sm-2" style="font-size:20px;padding-bottom: 20px;">签名档:</label>
         <div class="col-sm-10" style="padding-top: 20px">
-          <textarea cols="20" rows="5" ng-model="user.signs"></textarea>
+          <textarea cols="30" rows="5" ng-model="user.signs"></textarea>
           <div ng-controller="toasterController">
             <toaster-container toaster-options="{'close-button':false, 'animation-class': 'toast-center-right', 'position-class': 'toast-top-full-width'}"></toaster-container>
             <button type="submit" style="float: right;" class="btn btn-primary" ng-click="pop()">修改</button>
           </div>
         </div>
-        <br><br>
       </div>
     </form>
     </div>

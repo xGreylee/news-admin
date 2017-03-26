@@ -65,6 +65,22 @@ router.param('post', function(req, res, next, id) {
 	})
 })
 
+router.param('user', function(req, res, next, id) {
+	var query = User.findById(id)
+
+	query.exec(function(err, user) {
+		if (err) {
+			return next(err)
+		}
+		if (!user) {
+			return next(new Error('cant find user'))
+		}
+
+		req.user = user
+		return next()
+	})
+})
+
 router.param('comment', function(req, res, next, id) {
 	var query = Comment.findById(id)
 
@@ -158,15 +174,14 @@ router.put('/posts/:post/comments/:comment/downvote', auth, function(req, res, n
 	})
 })
 
-router.get('/toPersonal', function(req, res, next) {
-	var user = new User()
-
-	user.find(function(err, users) {
+router.get('/personal/:id', auth, function(req, res, next) {
+	console.log('req:', req)
+	req.user.find(function(err, docs) {
 		if (err) {
 			return next(err)
 		}
-
-		res.json(users)
+		console.log('docs:', docs)
+		res.json(docs)
 	})
 })
 

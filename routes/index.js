@@ -65,6 +65,22 @@ router.param('post', function(req, res, next, id) {
 	})
 })
 
+router.param('user', function(req, res, next, id) {
+	var query = User.findById(id)
+
+	query.exec(function(err, user) {
+		if (err) {
+			return next(err)
+		}
+		if (!user) {
+			return next(new Error('cant find user'))
+		}
+
+		req.user = user
+		return next()
+	})
+})
+
 router.param('comment', function(req, res, next, id) {
 	var query = Comment.findById(id)
 
@@ -86,12 +102,6 @@ router.get('/posts/:post', function(req, res, next) {
 		res.json(post)
 	})
 })
-
-// router.get('/posts/:post/detail', function(req, res, next) {
-// 	req.post.populate('comments', function(err, post) {
-// 		res.json(post)
-// 	})
-// })
 
 router.put('/posts/:post/update', auth, function(req, res, next) {
 	Post.update(req.post, req.body, {}, function(err, post) {
@@ -164,6 +174,17 @@ router.put('/posts/:post/comments/:comment/downvote', auth, function(req, res, n
 	})
 })
 
+router.get('/personal/:id', auth, function(req, res, next) {
+	console.log('req:', req)
+	req.user.find(function(err, docs) {
+		if (err) {
+			return next(err)
+		}
+		console.log('docs:', docs)
+		res.json(docs)
+	})
+})
+
 router.post('/register', function(req, res, next) {
 	if (!req.body.username || !req.body.password) {
 		return res.status(400).json({
@@ -174,6 +195,9 @@ router.post('/register', function(req, res, next) {
 	var user = new User()
 
 	user.username = req.body.username
+	user.nickname = req.body.nickname
+	user.signs = req.body.signs
+	user.gender = req.body.gender
 
 	user.setPassword(req.body.password)
 

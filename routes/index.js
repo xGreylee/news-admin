@@ -30,7 +30,6 @@ router.get('/posts', function(req, res, next) {
 router.post('/posts', auth, function(req, res, next) {
 	var post = new Post(req.body)
 	post.author = req.payload.username
-
 	post.save(function(err, post) {
 		if (err) {
 			return next(err)
@@ -65,21 +64,21 @@ router.param('post', function(req, res, next, id) {
 	})
 })
 
-router.param('user', function(req, res, next, id) {
-	var query = User.findById(id)
+// router.param('user', function(req, res, next, id) {
+// 	var query = User.findById(id)
 
-	query.exec(function(err, user) {
-		if (err) {
-			return next(err)
-		}
-		if (!user) {
-			return next(new Error('cant find user'))
-		}
+// 	query.exec(function(err, user) {
+// 		if (err) {
+// 			return next(err)
+// 		}
+// 		if (!user) {
+// 			return next(new Error('cant find user'))
+// 		}
 
-		req.user = user
-		return next()
-	})
-})
+// 		req.user = user
+// 		return next()
+// 	})
+// })
 
 router.param('comment', function(req, res, next, id) {
 	var query = Comment.findById(id)
@@ -108,7 +107,7 @@ router.put('/posts/:post/update', auth, function(req, res, next) {
 		if (err) {
 			return next(err)
 		}
-
+		console.log('post:', post)
 		res.json(post)
 	})
 })
@@ -174,9 +173,23 @@ router.put('/posts/:post/comments/:comment/downvote', auth, function(req, res, n
 	})
 })
 
-router.get('/personal/:id', auth, function(req, res, next) {
-	console.log('req:', req)
-	req.user.find(function(err, docs) {
+router.get('/personal', auth, function(req, res, next) {
+	// console.log('req.payload:', req.payload)
+	User.find({
+		username: req.payload.username
+	}, function(err, docs) {
+		if (err) {
+			return next(err)
+		}
+		res.json(docs)
+	})
+})
+
+router.put('/personal/update', auth, function(req, res, next) {
+	console.log('req.payload:', req.payload)
+	User.findByIdAndUpdate({
+		_id: req.payload._id
+	}, req.body, {}, function(err, docs) {
 		if (err) {
 			return next(err)
 		}

@@ -62,15 +62,13 @@ app.config(['$stateProvider', '$urlRouterProvider',
 			},
 		})
 		.state('personal', {
-			url: '/personal/:id',
+			url: '/personal',
 			templateUrl: '/personal.html',
-			controller: 'AuthCtrl',
+			controller: 'UserCtrl',
 			resolve: {
-				user: ['$stateParams', 'auth',
+				users: ['$stateParams', 'auth',
 					function($stateParams, auth) {
-						if (auth.isLoggedIn()) {
-							return auth.getInfo()
-						}
+						return auth.getInfo()
 					},
 				],
 			},
@@ -137,11 +135,22 @@ app.factory('auth', ['$http', '$window',
 			}
 		}
 
-		auth.getInfo = function(payload) {
-			console.log('getInfo------>')
-			// let token = auth.getToken()
-			// let payload = JSON.parse($window.atob(token.split('.')[1]))
-			return $http.get('/personal/' + payload._id).success(function(res) {
+		auth.getInfo = function() {
+			return $http.get('/personal', {
+				headers: {
+					Authorization: 'Bearer ' + auth.getToken(),
+				},
+			}).success(function(res) {
+				return res.data
+			})
+		}
+
+		auth.update = function(id, user) {
+			return $http.put('/personal/update', user, {
+				headers: {
+					Authorization: 'Bearer ' + auth.getToken(),
+				},
+			}).success(function(res) {
 				console.log('res:', res)
 				return res.data
 			})
@@ -267,6 +276,13 @@ app.factory('posts', ['$http', 'auth',
 	},
 ])
 
+// app.factory('users', ['$http', 'auth', 
+// 	function($http, auth) {
+// 		const users = {}
+// 		return users
+// 	},
+// ])
+
 app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 	function($scope, posts, auth) {
 		$scope.posts = posts.posts
@@ -301,6 +317,7 @@ app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 			console.log('Upvoting:' + post.title + 'votes before:' + post.upvotes)
 			posts.upvote(post)
 		}
+
 		$scope.downvote = function(post) {
 			posts.downvote(post)
 		}
@@ -349,7 +366,7 @@ app.controller('PostsCtrl', ['$scope', '$state', 'posts', 'post', 'auth',
 app.controller('AuthCtrl', ['$scope', '$state', 'auth',
 	function($scope, $state, auth) {
 		$scope.user = {}
-		// $scope.getUser = auth.getInfo(user)
+
 		$scope.register = function() {
 			auth.register($scope.user).error(function(error) {
 				$scope.error = error
@@ -362,12 +379,24 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth',
 			auth.logIn($scope.user).error(function(error) {
 				$scope.error = error
 			}).then(function(data) {
-				console.log('user data:', data)
 				$state.go('home')
 			})
 		}
 	},
 ])
+
+app.controller('UserCtrl', function($scope, users, auth, $state) {
+	$scope.users = users.data[0]
+	console.log('$scope.users:', $scope.users)
+	$scope.updateInfo = function() {
+		auth.update($scope.users._id, {
+			nickname: $scope.users.nickname,
+			signs: $scope.users.signs,
+		}).then(function() {
+			$state.go('home')
+		})
+	}
+})
 
 app.controller('NavCtrl', ['$scope', 'auth',
 	function($scope, auth) {

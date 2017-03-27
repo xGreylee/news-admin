@@ -73,6 +73,18 @@ app.config(['$stateProvider', '$urlRouterProvider',
 				],
 			},
 		})
+		.state('resetPwd', {
+			url: '/resetPwd',
+			templateUrl: '/resetPwd.html',
+			// controller: 'AuthCtrl',
+			// resolve: {
+			// 	users: ['$stateParams', 'auth',
+			// 		function($stateParams, auth) {
+			// 			return
+			// 		},
+			// 	],
+			// },
+		})
 		.state('login', {
 			url: '/login',
 			templateUrl: '/login.html',
@@ -276,13 +288,6 @@ app.factory('posts', ['$http', 'auth',
 	},
 ])
 
-// app.factory('users', ['$http', 'auth', 
-// 	function($http, auth) {
-// 		const users = {}
-// 		return users
-// 	},
-// ])
-
 app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 	function($scope, posts, auth) {
 		$scope.posts = posts.posts
@@ -387,7 +392,7 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth',
 
 app.controller('UserCtrl', function($scope, users, auth, $state) {
 	$scope.users = users.data[0]
-	console.log('$scope.users:', $scope.users)
+	// console.log('$scope.users:', $scope.users)
 	$scope.updateInfo = function() {
 		auth.update($scope.users._id, {
 			nickname: $scope.users.nickname,

@@ -17,6 +17,10 @@
   <script src="http://cdn.bootcss.com/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.js"></script>
   <script src="http://cdn.bootcss.com/angularjs-toaster/2.1.0/toaster.js"></script>
 
+  <script type="text/javascript" src="/vendors/angular-translate/angular-translate.min.js"></script>
+  <script type="text/javascript" src="/vendors/angular-translate/angular-translate-loader-static-files.min.js"></script>
+  <script type="text/javascript" src="/dist/angular-validation.min.js"></script>
+
   <script src="javascripts/angularApp.js"></script>
   <style> .glyphicon-thumbs-up { cursor:pointer } </style>
 </head>
@@ -75,7 +79,7 @@
             </span>
             <hr>
             <span class="glyphicon glyphicon-asterisk">
-              <a href="/#/" style="font-size:16px;text-align: center">修改密码</a>
+              <a href="/#/resetPwd" style="font-size:16px;text-align: center">修改密码</a>
             </span>
           </div>
           <div uib-accordion-group class="panel-default">
@@ -366,6 +370,44 @@
       </div>
     </form>
     </div>
+  </script>
+
+  <script type="text/ng-template" id="/resetPwd.html">
+    <div class="page-header">
+      <h1>修改密码</h1>
+    </div>
+  
+    <div ng-show="error" class="alert alert-danger row">
+      <span>{{ error.message }}</span>
+    </div>
+  
+    <form ng-submit="resetPwd()" style="margin-top:30px;">
+      <div class="form-group" style="padding-bottom: 50px;padding-top: 20px;">
+        <label class="control-label col-sm-3" style="font-size:18px">旧&nbsp;&nbsp;密&nbsp;&nbsp;码:</label>
+        <div class="col-md-8">
+          <input type="password" class="form-control" placeholder="old password" ng-model="user.password"></input>
+        </div>
+      </div>
+
+      <div class="form-group" style="padding-bottom: 50px;">
+        <label class="control-label col-sm-3" style="font-size:18px">新&nbsp;&nbsp;密&nbsp;&nbsp;码:</label>
+        <div class="col-md-8">
+          <input type="password" class="form-control" placeholder="new password" ng-model="user.password"></input>
+        </div>
+      </div>
+
+      <div class="form-group" style="padding-bottom: 50px;">
+        <label class="control-label col-sm-3" style="font-size:18px">确认新密码:</label>
+        <div class="col-md-8">
+          <input type="password" class="form-control" placeholder="Input new password again" ng-model="user.password"></input>
+        </div>
+      </div>
+
+      <div class="btn-group col-md-offset-8">
+        <button type="submit" class="btn btn-primary">提交</button>
+        <button type="reset" class="btn btn-warning">重置</button>
+      </div>
+    </form>
   </script>
 
   </body>

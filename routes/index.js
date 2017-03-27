@@ -64,22 +64,6 @@ router.param('post', function(req, res, next, id) {
 	})
 })
 
-// router.param('user', function(req, res, next, id) {
-// 	var query = User.findById(id)
-
-// 	query.exec(function(err, user) {
-// 		if (err) {
-// 			return next(err)
-// 		}
-// 		if (!user) {
-// 			return next(new Error('cant find user'))
-// 		}
-
-// 		req.user = user
-// 		return next()
-// 	})
-// })
-
 router.param('comment', function(req, res, next, id) {
 	var query = Comment.findById(id)
 
@@ -186,7 +170,7 @@ router.get('/personal', auth, function(req, res, next) {
 })
 
 router.put('/personal/update', auth, function(req, res, next) {
-	console.log('req.payload:', req.payload)
+	// console.log('req.payload:', req.payload)
 	User.findByIdAndUpdate({
 		_id: req.payload._id
 	}, req.body, {}, function(err, docs) {

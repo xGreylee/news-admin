@@ -1,7 +1,7 @@
-const app = angular.module('news-admin', ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngSanitize', 'ngMessages', 'toaster'])
+const app = angular.module('news-admin', ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngSanitize', 'ngMessages', 'toaster', 'ngValidate'])
 
-app.config(['$stateProvider', '$urlRouterProvider',
-	function($stateProvider, $urlRouterProvider) {
+app.config(['$stateProvider', '$urlRouterProvider', '$validatorProvider',
+	function($stateProvider, $urlRouterProvider, $validatorProvider) {
 		$stateProvider.state('home', {
 			url: '/home',
 			templateUrl: '/home.html',
@@ -76,7 +76,7 @@ app.config(['$stateProvider', '$urlRouterProvider',
 		.state('resetPwd', {
 			url: '/resetPwd',
 			templateUrl: '/resetPwd.html',
-			// controller: 'AuthCtrl',
+			controller: 'PwdCtrl',
 			// resolve: {
 			// 	users: ['$stateParams', 'auth',
 			// 		function($stateParams, auth) {
@@ -111,6 +111,10 @@ app.config(['$stateProvider', '$urlRouterProvider',
 		})
 
 		$urlRouterProvider.otherwise('home')
+		$validatorProvider.setDefaults({
+			errorElement: 'span',
+			errorClass: 'help-block'
+		})
 	},
 ])
 
@@ -400,6 +404,32 @@ app.controller('UserCtrl', function($scope, users, auth, $state) {
 		}).then(function() {
 			$state.go('home')
 		})
+	}
+})
+
+app.controller('PwdCtrl', function($scope, auth, $state) {
+	$scope.validationOptions = {
+		rules: {
+			new_password: {
+				required: true,
+				minlength: 6
+			},
+			re_password: {
+				required: true,
+				minlength: 6,
+				equalTo: '#new_password'
+			}
+		},
+		messages: {
+			password: {
+				required: 'You must enter a password',
+				minlength: 'Your password must have a minimum length of 6 characters'
+			},
+			re_password: {
+				required: 'You must enter the new password again',
+				equalTo: 'you must enter the same value with the new password'
+			}
+		}
 	}
 })
 

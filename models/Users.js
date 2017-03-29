@@ -51,4 +51,11 @@ UserSchema.methods.validPassword = function(password) {
 	return this.hash === hash
 }
 
+UserSchema.methods.resetPassword = function(password) {
+	this.salt = crypto.randomBytes(16).toString('hex')
+	var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex')
+	this.hash = hash
+	return this.hash
+}
+
 mongoose.model('User', UserSchema)

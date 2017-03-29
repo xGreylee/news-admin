@@ -13,15 +13,13 @@
   <script src="http://cdn.bootcss.com/angular-messages/1.5.10/angular-messages.js"></script>
   <script src="http://cdn.bootcss.com/angular-ui-router/0.4.2/angular-ui-router.js"></script>
   <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.js"></script>
-  <script src="http://cdn.bootcss.com/jquery-validate/1.16.0/jquery.validate.js"></script>
-  <script src="http://cdn.bootcss.com/jquery-validate/1.16.0/jquery.validate.min.js"></script>
   <script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.js"></script>
   <script src="http://cdn.bootcss.com/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.js"></script>
   <script src="http://cdn.bootcss.com/angularjs-toaster/2.1.0/toaster.js"></script>
 
+  <script src="w5cValidator.js"></script>
   <script src="javascripts/angularApp.js"></script>
-  <script src="angular-validate/src/angular-validate.js"></script>
-  <script src="angular-validate/dist/angular-validate.min.js"></script>
+
   <style> .glyphicon-thumbs-up { cursor:pointer } </style>
 </head>
 <body ng-app="news-admin">
@@ -381,25 +379,18 @@
       <span>{{ error.message }}</span>
     </div>
   
-    <form name="pwdForm" ng-submit="resetPwd(pwdForm)" ng-validate="validationOptions" style="margin-top:30px;">
-      <!-- <div class="form-group" style="padding-bottom: 50px;padding-top: 20px;">
-        <label class="control-label col-sm-3" style="font-size:18px">旧&nbsp;&nbsp;密&nbsp;&nbsp;码:</label>
-        <div class="col-md-8">
-          <input type="password" name="old_password" class="form-control" placeholder="old password" ng-model="user.password"></input>
-        </div>
-      </div> -->
-
+    <form name="pwdForm" ng-submit="resetPwd()" w5c-form-validate="vm.validateOptions" style="margin-top:30px;" novalidate>
       <div class="form-group" style="padding-bottom: 50px;">
         <label class="control-label col-sm-3" style="font-size:18px">新&nbsp;&nbsp;密&nbsp;&nbsp;码:</label>
         <div class="col-md-8">
-          <input type="password" name="new_password" class="form-control" placeholder="new password" ng-model="user.password"></input>
+          <input type="password" name="password" class="form-control" required placeholder="new password" ng-model="vm.password" ng-minlength="6" ng-maxlength="20"></input>
         </div>
       </div>
 
       <div class="form-group" style="padding-bottom: 50px;">
         <label class="control-label col-sm-3" style="font-size:18px">确认新密码:</label>
         <div class="col-md-8">
-          <input type="password" name="re_password" class="form-control" placeholder="Input new password again" ng-model="user.password"></input>
+          <input type="password" name="repassword" class="form-control" required placeholder="Input new password again" ng-model="vm.repassword" w5c-repeat="password" ng-minlength="6" ng-maxlength="20"></input>
         </div>
       </div>
 

@@ -1,14 +1,14 @@
-var mongoose = require('mongoose')
-var express = require('express')
-var router = express.Router()
-var passport = require('passport')
-var jwt = require('express-jwt')
+const mongoose = require('mongoose')
+const express = require('express')
+const router = express.Router()
+const passport = require('passport')
+const jwt = require('express-jwt')
 
-var Post = mongoose.model('Post')
-var Comment = mongoose.model('Comment')
-var User = mongoose.model('User')
+const Post = mongoose.model('Post')
+const Comment = mongoose.model('Comment')
+const User = mongoose.model('User')
 
-var auth = jwt({
+const auth = jwt({
 	secret: 'SECRET',
 	userProperty: 'payload'
 })
@@ -28,7 +28,7 @@ router.get('/posts', function(req, res, next) {
 })
 
 router.post('/posts', auth, function(req, res, next) {
-	var post = new Post(req.body)
+	const post = new Post(req.body)
 	post.author = req.payload.username
 	post.save(function(err, post) {
 		if (err) {
@@ -49,7 +49,7 @@ router.delete('/posts/:post/delete', auth, function(req, res, next) {
 })
 
 router.param('post', function(req, res, next, id) {
-	var query = Post.findById(id)
+	const query = Post.findById(id)
 
 	query.exec(function(err, post) {
 		if (err) {
@@ -65,7 +65,7 @@ router.param('post', function(req, res, next, id) {
 })
 
 router.param('comment', function(req, res, next, id) {
-	var query = Comment.findById(id)
+	const query = Comment.findById(id)
 
 	query.exec(function(err, comment) {
 		if (err) {
@@ -91,7 +91,7 @@ router.put('/posts/:post/update', auth, function(req, res, next) {
 		if (err) {
 			return next(err)
 		}
-		console.log('post:', post)
+		// console.log('post:', post)
 		res.json(post)
 	})
 })
@@ -117,7 +117,7 @@ router.put('/posts/:post/downvote', auth, function(req, res, next) {
 })
 
 router.post('/posts/:post/comments', auth, function(req, res, next) {
-	var comment = new Comment(req.body)
+	const comment = new Comment(req.body)
 	comment.post = req.post
 	comment.author = req.payload.username
 
@@ -160,7 +160,7 @@ router.put('/posts/:post/comments/:comment/downvote', auth, function(req, res, n
 router.get('/personal', auth, function(req, res, next) {
 	// console.log('req.payload:', req.payload)
 	User.find({
-		username: req.payload.username
+		_id: req.payload._id
 	}, function(err, docs) {
 		if (err) {
 			return next(err)
@@ -177,7 +177,7 @@ router.put('/personal/update', auth, function(req, res, next) {
 		if (err) {
 			return next(err)
 		}
-		console.log('docs:', docs)
+		// console.log('docs:', docs)
 		res.json(docs)
 	})
 })
@@ -189,7 +189,7 @@ router.post('/register', function(req, res, next) {
 		})
 	}
 
-	var user = new User()
+	const user = new User()
 
 	user.username = req.body.username
 	user.nickname = req.body.nickname
@@ -203,6 +203,29 @@ router.post('/register', function(req, res, next) {
 			return next(err)
 		}
 
+		return res.json({
+			token: user.generateJWT()
+		})
+	})
+})
+
+router.put('/resetPwd/update', auth, function(req, res, next) {
+	const user = new User()
+	console.log('req.body:', req.body)
+	console.log('----------------->')
+	console.log('req.payload:', req.payload)
+	let newPwd = user.resetPassword(req.body.password)
+	console.log('----------------->')
+	console.log('newPwd:', newPwd)
+	User.findByIdAndUpdate({
+		_id: req.payload._id
+	}, {
+		hash: newPwd
+	}, {}, function(err, docs) {
+		if (err) {
+			return next(err)
+		}
+		console.log('docs:', docs)
 		return res.json({
 			token: user.generateJWT()
 		})

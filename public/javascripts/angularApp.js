@@ -1,7 +1,7 @@
-const app = angular.module('news-admin', ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngSanitize', 'ngMessages', 'toaster', 'ngValidate'])
+const app = angular.module('news-admin', ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngSanitize', 'ngMessages', 'toaster', 'w5c.validator'])
 
-app.config(['$stateProvider', '$urlRouterProvider', '$validatorProvider',
-	function($stateProvider, $urlRouterProvider, $validatorProvider) {
+app.config(['$stateProvider', '$urlRouterProvider', 'w5cValidatorProvider',
+	function($stateProvider, $urlRouterProvider, w5cValidatorProvider) {
 		$stateProvider.state('home', {
 			url: '/home',
 			templateUrl: '/home.html',
@@ -77,13 +77,13 @@ app.config(['$stateProvider', '$urlRouterProvider', '$validatorProvider',
 			url: '/resetPwd',
 			templateUrl: '/resetPwd.html',
 			controller: 'PwdCtrl',
-			// resolve: {
-			// 	users: ['$stateParams', 'auth',
-			// 		function($stateParams, auth) {
-			// 			return
-			// 		},
-			// 	],
-			// },
+			// onEnter: ['$state', 'auth',
+			// 	function($state, auth) {
+			// 		if (auth.isLoggedIn()) {
+			// 			$state.go('home')
+			// 		}
+			// 	},
+			// ],
 		})
 		.state('login', {
 			url: '/login',
@@ -111,12 +111,48 @@ app.config(['$stateProvider', '$urlRouterProvider', '$validatorProvider',
 		})
 
 		$urlRouterProvider.otherwise('home')
-		$validatorProvider.setDefaults({
-			errorElement: 'span',
-			errorClass: 'help-block'
+
+		w5cValidatorProvider.config({
+			blurTrig: false,
+			showError: true,
+			removeError: true
 		})
-	},
+
+		w5cValidatorProvider.setRules({
+			email: {
+				required: '输入的邮箱地址不能为空',
+				email: '输入邮箱地址格式不正确'
+			},
+			username: {
+				required: '输入的用户名不能为空',
+				pattern: '用户名必须输入字母、数字、下划线,以字母开头',
+				w5cuniquecheck: '输入用户名已经存在，请重新输入'
+			},
+			password: {
+				required: '密码不能为空',
+				minlength: '密码长度不能小于{minlength}',
+				maxlength: '密码长度不能大于{maxlength}'
+			},
+			repassword: {
+				required: '重复密码不能为空',
+				repeat: '两次密码输入不一致'
+			},
+			number: {
+				required: '数字不能为空'
+			},
+			customizer: {
+				customizer: '自定义验证数字必须大于上面的数字'
+			},
+			dynamicName: {
+				required: '动态Name不能为空'
+			},
+			dynamic: {
+				required: '动态元素不能为空'
+			}
+		})
+	}
 ])
+
 
 app.factory('auth', ['$http', '$window',
 	function($http, $window) {
@@ -146,7 +182,7 @@ app.factory('auth', ['$http', '$window',
 			if (auth.isLoggedIn()) {
 				let token = auth.getToken()
 				let payload = JSON.parse($window.atob(token.split('.')[1]))
-				// console.log('payload:', payload)
+					// console.log('payload:', payload)
 				return payload.username
 			}
 		}
@@ -169,6 +205,16 @@ app.factory('auth', ['$http', '$window',
 			}).success(function(res) {
 				console.log('res:', res)
 				return res.data
+			})
+		}
+
+		auth.resetPwd = function(user) {
+			return $http.put('/resetPwd/update', user, {
+				headers: {
+					Authorization: 'Bearer ' + auth.getToken(),
+				},
+			}).success(function(data) {
+				auth.saveToken(data.token)
 			})
 		}
 
@@ -252,7 +298,7 @@ app.factory('posts', ['$http', 'auth',
 		}
 
 		o.update = function(id, post) {
-			return $http.put('/posts/' + id +'/update', post, {
+			return $http.put('/posts/' + id + '/update', post, {
 				headers: {
 					Authorization: 'Bearer ' + auth.getToken(),
 				},
@@ -311,7 +357,7 @@ app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 
 			$scope.title = ''
 			$scope.link = ''
-			$scope.contents= ''
+			$scope.contents = ''
 		}
 
 		$scope.showPost = function(post) {
@@ -319,7 +365,7 @@ app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 		}
 
 		$scope.deletePost = function(post) {
-			posts.delete(post._id) 
+			posts.delete(post._id)
 		}
 
 		$scope.upvote = function(post) {
@@ -396,7 +442,7 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth',
 
 app.controller('UserCtrl', function($scope, users, auth, $state) {
 	$scope.users = users.data[0]
-	// console.log('$scope.users:', $scope.users)
+	console.log('$scope.users:', $scope.users)
 	$scope.updateInfo = function() {
 		auth.update($scope.users._id, {
 			nickname: $scope.users.nickname,
@@ -408,29 +454,64 @@ app.controller('UserCtrl', function($scope, users, auth, $state) {
 })
 
 app.controller('PwdCtrl', function($scope, auth, $state) {
-	$scope.validationOptions = {
-		rules: {
-			new_password: {
-				required: true,
-				minlength: 6
-			},
-			re_password: {
-				required: true,
-				minlength: 6,
-				equalTo: '#new_password'
-			}
-		},
-		messages: {
-			password: {
-				required: 'You must enter a password',
-				minlength: 'Your password must have a minimum length of 6 characters'
-			},
-			re_password: {
-				required: 'You must enter the new password again',
-				equalTo: 'you must enter the same value with the new password'
-			}
+	var vm = $scope.vm = {
+		htmlSource: '',
+		showErrorType: '1',
+		showDynamicElement: true,
+		dynamicName: 'dynamicName',
+		entity: {}
+	}
+
+	vm.saveEntity = function($event) {
+		alert('Save Successfully!!!')
+	}
+
+	vm.validateOptions = {
+		blurTrig: true
+	}
+
+	vm.customizer = function() {
+		return vm.entity.customizer > vm.entity.number
+	}
+
+	vm.changeShowType = function() {
+		if (vm.showErrorType == 2) {
+			vm.validateOptions.showError = false
+			vm.validateOptions.removeError = false
+		} else {
+			vm.validateOptions.showError = true
+			vm.validateOptions.removeError = true
 		}
 	}
+
+	vm.types = [{
+		value: 1,
+		text: '选择框'
+	}, {
+		value: 2,
+		text: '输入框'
+	}]
+
+	$scope.resetPwd = function() {
+		auth.resetPwd(vm).error(function(error) {
+			$scope.error = error
+		}).then(function(data) {
+			auth.logOut()
+			$state.go('login')
+		})
+	}
+	// $http.get('index.js').success(function(result) {
+	// 	vm.jsSource = result
+	// })
+	// $http.get('validate.form.html').success(function(result) {
+	// 	vm.htmlSource = result
+	// })
+	// $http.get('validate.form.html').success(function(result) {
+	// 	vm.htmlSource = result
+	// })
+	// $http.get('css/style.less').success(function(result) {
+	// 	vm.lessSource = result
+	// })
 })
 
 app.controller('NavCtrl', ['$scope', 'auth',

@@ -32,9 +32,11 @@ UserSchema.methods.generateJWT = function() {
 	return jwt.sign({
 		_id: this._id,
 		username: this.username,
-		gender: this.gender,
-		nickname: this.nickname,
-		signs: this.signs,
+		hash: this.hash,
+		// salt: this.salt,
+		// gender: this.gender,
+		// nickname: this.nickname,
+		// signs: this.signs,
 		exp: parseInt(exp.getTime() / 1000),
 	}, 'SECRET')
 }

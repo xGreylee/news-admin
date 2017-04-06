@@ -65,7 +65,7 @@
               评论信息管理 <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
             </uib-accordion-heading>
             <span class="glyphicon glyphicon-list">
-              <a href="/#/" style="font-size:16px;text-align: center">评论列表</a>
+              <a href="/#/clist" style="font-size:16px;text-align: center">评论列表</a>
             </span>
           </div>
           <div uib-accordion-group class="panel-default">
@@ -107,10 +107,6 @@
     <div class="page-header">
       <h2>Welcome to News-Admin</h2>
     </div>
-
-    <div ng-hide="isLoggedIn()">
-      <h3>您需要 <a href="/#/login">登录</a> 或者 <a href="/#/register">注册</a> 才有权限进行新闻信息的管理</h3>
-    </div>
   </script>
 
   <script type="text/ng-template" id="/plist.html">
@@ -138,6 +134,27 @@
 
     <div ng-hide="isLoggedIn()">
       <h3>您需要 <a href="/#/login">登录</a> 或者 <a href="/#/register">注册</a> 才有权限进行新闻信息的管理</h3>
+    </div>
+  </script>
+
+  <script type="text/ng-template" id="/clist.html">
+    <div class="page-header">
+      <h2>评论列表</h2>
+    </div>
+    <div class="row" style="margin-top:10px;" ng-repeat="comment in comments">
+      <span style="font-size:20px;margin-left:20px">
+        <a ng-show="comment.body" href="">
+          {{comment.body}}
+        </a>
+        <span ng-show="comment.author">
+          来自 <a>{{comment.author}}</a>
+        </span>
+      </span>
+      <a class="glyphicon glyphicon-trash" ng-click=""></a>
+    </div>
+
+    <div ng-hide="isLoggedIn()">
+      <h3>您需要 <a href="/#/login">登录</a> 或者 <a href="/#/register">注册</a> 才有权限进行评论信息的管理</h3>
     </div>
   </script>
 

@@ -27,6 +27,16 @@ router.get('/posts', function(req, res, next) {
 	})
 })
 
+router.get('/comments', function(req, res, next) {
+	Comment.find(function(err, comments) {
+		if (err) {
+			return next(err)
+		}
+		// console.log('comments:', comments)
+		res.json(comments)
+	})
+})
+
 router.post('/posts', auth, function(req, res, next) {
 	const post = new Post(req.body)
 	post.author = req.payload.username
@@ -45,6 +55,16 @@ router.delete('/posts/:post/delete', auth, function(req, res, next) {
 			return next(err)
 		}
 		res.json(posts)
+	})
+})
+
+router.delete('/comments/:comment/delete', auth, function(req, res, next) {
+	console.log('req.comment:', req.comment)
+	req.comment.remove(function(err, comments) {
+		if (err) {
+			return next(err)
+		}
+		res.json(comments)
 	})
 })
 
@@ -190,7 +210,7 @@ router.post('/register', function(req, res, next) {
 	}
 
 	const user = new User()
-
+	console.log('user:', user)
 	user.username = req.body.username
 	user.nickname = req.body.nickname
 	user.signs = req.body.signs
@@ -211,17 +231,16 @@ router.post('/register', function(req, res, next) {
 
 router.put('/resetPwd/update', auth, function(req, res, next) {
 	const user = new User()
-	console.log('req.body:', req.body)
+	console.log('user:', user)
 	console.log('----------------->')
 	console.log('req.payload:', req.payload)
-	let newPwd = user.resetPassword(req.body.password)
 	console.log('----------------->')
+	let newPwd = user.resetPassword(req.body.password)
 	console.log('newPwd:', newPwd)
-	User.findByIdAndUpdate({
-		_id: req.payload._id
-	}, {
+	console.log('----------------->')
+	User.findByIdAndUpdate(req.payload._id, {
 		hash: newPwd
-	}, {}, function(err, docs) {
+	}, function(err, docs) {
 		if (err) {
 			return next(err)
 		}

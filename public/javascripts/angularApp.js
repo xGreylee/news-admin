@@ -26,6 +26,38 @@ app.config(['$stateProvider', '$urlRouterProvider', 'w5cValidatorProvider',
 				],
 			},
 		})
+		.state('clist', {
+			url: '/clist',
+			templateUrl: '/clist.html',
+			controller: 'CommentCtrl',
+			resolve: {
+				commentPromise: function($http) {
+					return $http.get('/comments').success(function(data) {
+						// console.log('data:', data)
+						const comments = []
+						angular.copy(data, comments)
+					})
+				},
+
+				deleteComment: function($http, auth, $stateParams) {
+					return $http.delete('/comments/', +$stateParams.id, '/delete', {
+						headers: {
+							Authorization: 'Bearer ' + auth.getToken(),
+						},
+					}).success(function(data) {
+						console.log('data:', data)
+					})
+				}
+				// commentPromise: ['comments', 'auth', '$state',
+				// 	function(comments, auth, $state) {
+				// 		if (auth.isLoggedIn()) {
+				// 			return comments.getAll()
+				// 		}
+				// 		$state.go('login')
+				// 	}
+				// ],
+			},
+		})
 		.state('addPost', {
 			url: '/addPost',
 			templateUrl: '/addPost.html',
@@ -79,9 +111,8 @@ app.config(['$stateProvider', '$urlRouterProvider', 'w5cValidatorProvider',
 			controller: 'PwdCtrl',
 			// onEnter: ['$state', 'auth',
 			// 	function($state, auth) {
-			// 		if (auth.isLoggedIn()) {
-			// 			$state.go('home')
-			// 		}
+			// 		auth.logOut()
+			// 		$state.go('login')
 			// 	},
 			// ],
 		})
@@ -203,7 +234,7 @@ app.factory('auth', ['$http', '$window',
 					Authorization: 'Bearer ' + auth.getToken(),
 				},
 			}).success(function(res) {
-				console.log('res:', res)
+				// console.log('res:', res)
 				return res.data
 			})
 		}
@@ -215,6 +246,8 @@ app.factory('auth', ['$http', '$window',
 				},
 			}).success(function(data) {
 				auth.saveToken(data.token)
+				// console.log('res:', res)
+				// return res.data
 			})
 		}
 
@@ -237,6 +270,33 @@ app.factory('auth', ['$http', '$window',
 		return auth
 	},
 ])
+
+// app.factory('comments', ['http', 'auth',
+// 	function($http, auth) {
+// 		const c = {
+// 			comments: [],
+// 		}
+
+// 		// c.getAll = function() {
+// 		// 	return $http.get('/comments').success(function(data) {
+// 		// 		angular.copy(data, c.comments)
+// 		// 	})
+// 		// }
+
+// 		c.delete = function(id) {
+// 			return $http.delete('/comments/', +id, '/delete', {
+// 				headers: {
+// 					Authorization: 'Bearer ' + auth.getToken(),
+// 				},
+// 			}).success(function(data) {
+// 				console.log('data:', data)
+// 				return c.getAll()
+// 			})
+// 		}
+
+// 		return c
+// 	},
+// ])
 
 app.factory('posts', ['$http', 'auth',
 	function($http, auth) {
@@ -340,6 +400,7 @@ app.factory('posts', ['$http', 'auth',
 
 app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 	function($scope, posts, auth) {
+		// console.log('posts:', posts)
 		$scope.posts = posts.posts
 		$scope.isLoggedIn = auth.isLoggedIn
 
@@ -440,9 +501,25 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth',
 	},
 ])
 
+app.controller('CommentCtrl', function($scope, commentPromise, auth, deleteComment) {
+	console.log('commentPromise:', commentPromise)
+	console.log('deleteComment:', deleteComment)
+	$scope.isLoggedIn = auth.isLoggedIn
+	$scope.comments = commentPromise.data
+
+	// $scope.deleteComment = function(comment) {
+
+	// }
+})
+
+// app.controller('CommentCtrl', function($scope, commentPromise, auth) {
+// 	console.log('commentPromise:', commentPromise)
+// 	$scope.isLoggedIn = auth.isLoggedIn
+// })
+
 app.controller('UserCtrl', function($scope, users, auth, $state) {
 	$scope.users = users.data[0]
-	console.log('$scope.users:', $scope.users)
+	// console.log('$scope.users:', $scope.users)
 	$scope.updateInfo = function() {
 		auth.update($scope.users._id, {
 			nickname: $scope.users.nickname,

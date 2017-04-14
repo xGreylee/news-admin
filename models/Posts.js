@@ -12,7 +12,11 @@ var PostSchema = new mongoose.Schema({
 	comments: [{
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Comment'
-	}]
+	}],
+	categories: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Category'
+	}
 })
 
 PostSchema.methods.upvote = function(cb) {

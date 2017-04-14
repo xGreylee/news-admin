@@ -1,145 +1,153 @@
-const app = angular.module('news-admin', ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngSanitize', 'ngMessages', 'toaster', 'w5c.validator'])
+const app = angular.module('news-admin', ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngSanitize',
+	'ngMessages', 'toaster', 'w5c.validator'
+])
 
 app.config(['$stateProvider', '$urlRouterProvider', 'w5cValidatorProvider',
 	function($stateProvider, $urlRouterProvider, w5cValidatorProvider) {
-		$stateProvider.state('home', {
-			url: '/home',
-			templateUrl: '/home.html',
-			controller: 'MainCtrl',
-			resolve: {
-				postPromise: ['posts',
-					function(posts) {
-						return posts.getAll()
-					},
-				],
-			},
-		})
-		.state('plist', {
-			url: '/plist',
-			templateUrl: '/plist.html',
-			controller: 'MainCtrl',
-			resolve: {
-				postPromise: ['posts',
-					function(posts) {
-						return posts.getAll()
-					},
-				],
-			},
-		})
-		.state('clist', {
-			url: '/clist',
-			templateUrl: '/clist.html',
-			controller: 'CommentCtrl',
-			resolve: {
-				commentPromise: function($http) {
-					return $http.get('/comments').success(function(data) {
-						// console.log('data:', data)
-						const comments = []
-						angular.copy(data, comments)
-					})
-				},
-
-				deleteComment: function($http, auth, $stateParams) {
-					return $http.delete('/comments/', +$stateParams.id, '/delete', {
-						headers: {
-							Authorization: 'Bearer ' + auth.getToken(),
+		$stateProvider
+			.state('home', {
+				url: '/home',
+				templateUrl: '/home.html',
+				controller: 'MainCtrl',
+				resolve: {
+					postPromise: ['posts',
+						function(posts) {
+							return posts.getAll()
 						},
-					}).success(function(data) {
-						console.log('data:', data)
-					})
-				}
-				// commentPromise: ['comments', 'auth', '$state',
-				// 	function(comments, auth, $state) {
-				// 		if (auth.isLoggedIn()) {
-				// 			return comments.getAll()
-				// 		}
+					],
+				},
+			})
+			.state('plist', {
+				url: '/plist',
+				templateUrl: '/plist.html',
+				controller: 'MainCtrl',
+				resolve: {
+					postPromise: ['posts',
+						function(posts) {
+							return posts.getAll()
+						},
+					],
+				},
+			})
+			.state('clist', {
+				url: '/clist',
+				templateUrl: '/clist.html',
+				controller: 'CommentCtrl',
+				resolve: {
+					commentPromise: ['comments',
+						function(comments) {
+							return comments.getAll()
+						}
+					],
+				},
+			})
+			.state('categorylist', {
+				url: '/categorylist',
+				templateUrl: '/categorylist.html',
+				controller: 'ModalDemoCtrl',
+				controllerAs: '$ctrl',
+				resolve: {
+					categoryPromise: ['categories',
+						function(categories) {
+							return categories.getAll()
+						}
+					],
+				},
+			})
+			.state('addPost', {
+				url: '/addPost',
+				templateUrl: '/addPost.html',
+				controller: 'MainCtrl',
+				resolve: {
+					categoryPromise: ['categories',
+						function(categories) {
+							return categories.getAll()
+						}
+					],
+				},
+			})
+			.state('postUpdate', {
+				url: '/posts/:id',
+				templateUrl: '/postUpdate.html',
+				controller: 'PostsCtrl',
+				resolve: {
+					post: ['$stateParams', 'posts', 'auth', '$state',
+						function($stateParams, posts, auth, $state) {
+							if (auth.isLoggedIn()) {
+								return posts.get($stateParams.id)
+							}
+							$state.go('login')
+						},
+					],
+					categoryPromise: ['categories',
+						function(categories) {
+							return categories.getAll()
+						}
+					],
+				},
+			})
+			.state('showPost', {
+				url: '/posts/:id/detail',
+				templateUrl: '/postDetail.html',
+				controller: 'PostsCtrl',
+				resolve: {
+					post: ['$stateParams', 'posts', 'auth', '$state',
+						function($stateParams, posts, auth, $state) {
+							if (auth.isLoggedIn()) {
+								return posts.get($stateParams.id)
+							}
+							$state.go('login')
+						},
+					],
+				},
+			})
+			.state('personal', {
+				url: '/personal',
+				templateUrl: '/personal.html',
+				controller: 'UserCtrl',
+				resolve: {
+					users: ['$stateParams', 'auth',
+						function($stateParams, auth) {
+							return auth.getInfo()
+						},
+					],
+				},
+			})
+			.state('resetPwd', {
+				url: '/resetPwd',
+				templateUrl: '/resetPwd.html',
+				controller: 'PwdCtrl',
+				// onEnter: ['$state', 'auth',
+				// 	function($state, auth) {
+				// 		auth.logOut()
 				// 		$state.go('login')
-				// 	}
+				// 	},
 				// ],
-			},
-		})
-		.state('addPost', {
-			url: '/addPost',
-			templateUrl: '/addPost.html',
-			controller: 'MainCtrl',
-		})
-		.state('postUpdate', {
-			url: '/posts/:id',
-			templateUrl: '/postUpdate.html',
-			controller: 'PostsCtrl',
-			resolve: {
-				post: ['$stateParams', 'posts', 'auth', '$state',
-					function($stateParams, posts, auth, $state) {
+			})
+			.state('login', {
+				url: '/login',
+				templateUrl: '/login.html',
+				controller: 'AuthCtrl',
+				onEnter: ['$state', 'auth',
+					function($state, auth) {
 						if (auth.isLoggedIn()) {
-							return posts.get($stateParams.id)
+							$state.go('home')
 						}
-						$state.go('login')
 					},
 				],
-			},
-		})
-		.state('showPost', {
-			url: '/posts/:id/detail',
-			templateUrl: '/postDetail.html',
-			controller: 'PostsCtrl',
-			resolve: {
-				post: ['$stateParams', 'posts', 'auth', '$state',
-					function($stateParams, posts, auth, $state) {
+			})
+			.state('register', {
+				url: '/register',
+				templateUrl: '/register.html',
+				controller: 'AuthCtrl',
+				onEnter: ['$state', 'auth',
+					function($state, auth) {
 						if (auth.isLoggedIn()) {
-							return posts.get($stateParams.id)
+							$state.go('home')
 						}
-						$state.go('login')
 					},
 				],
-			},
-		})
-		.state('personal', {
-			url: '/personal',
-			templateUrl: '/personal.html',
-			controller: 'UserCtrl',
-			resolve: {
-				users: ['$stateParams', 'auth',
-					function($stateParams, auth) {
-						return auth.getInfo()
-					},
-				],
-			},
-		})
-		.state('resetPwd', {
-			url: '/resetPwd',
-			templateUrl: '/resetPwd.html',
-			controller: 'PwdCtrl',
-			// onEnter: ['$state', 'auth',
-			// 	function($state, auth) {
-			// 		auth.logOut()
-			// 		$state.go('login')
-			// 	},
-			// ],
-		})
-		.state('login', {
-			url: '/login',
-			templateUrl: '/login.html',
-			controller: 'AuthCtrl',
-			onEnter: ['$state', 'auth',
-				function($state, auth) {
-					if (auth.isLoggedIn()) {
-						$state.go('home')
-					}
-				},
-			],
-		})
-		.state('register', {
-			url: '/register',
-			templateUrl: '/register.html',
-			controller: 'AuthCtrl',
-			onEnter: ['$state', 'auth',
-				function($state, auth) {
-					if (auth.isLoggedIn()) {
-						$state.go('home')
-					}
-				},
-			],
-		})
+			})
 
 		$urlRouterProvider.otherwise('home')
 
@@ -246,8 +254,8 @@ app.factory('auth', ['$http', '$window',
 				},
 			}).success(function(data) {
 				auth.saveToken(data.token)
-				// console.log('res:', res)
-				// return res.data
+					// console.log('res:', res)
+					// return res.data
 			})
 		}
 
@@ -271,32 +279,34 @@ app.factory('auth', ['$http', '$window',
 	},
 ])
 
-// app.factory('comments', ['http', 'auth',
-// 	function($http, auth) {
-// 		const c = {
-// 			comments: [],
-// 		}
+app.factory('comments', ['$http', 'auth',
+	function($http, auth) {
+		const c = {
+			comments: [],
+		}
 
-// 		// c.getAll = function() {
-// 		// 	return $http.get('/comments').success(function(data) {
-// 		// 		angular.copy(data, c.comments)
-// 		// 	})
-// 		// }
+		c.getAll = function() {
+			return $http.get('/comments').success(function(data) {
+				// console.log('comment data:', data)
+				angular.copy(data, c.comments)
+			})
+		}
 
-// 		c.delete = function(id) {
-// 			return $http.delete('/comments/', +id, '/delete', {
-// 				headers: {
-// 					Authorization: 'Bearer ' + auth.getToken(),
-// 				},
-// 			}).success(function(data) {
-// 				console.log('data:', data)
-// 				return c.getAll()
-// 			})
-// 		}
+		c.delete = function(id) {
+			console.log('comment._id:', id)
+			return $http.delete('/comments/' + id + '/delete', {
+				headers: {
+					Authorization: 'Bearer ' + auth.getToken(),
+				},
+			}).success(function(data) {
+				console.log('data:', data)
+				return c.getAll()
+			})
+		}
 
-// 		return c
-// 	},
-// ])
+		return c
+	},
+])
 
 app.factory('posts', ['$http', 'auth',
 	function($http, auth) {
@@ -352,8 +362,19 @@ app.factory('posts', ['$http', 'auth',
 					Authorization: 'Bearer ' + auth.getToken(),
 				},
 			}).success(function(data) {
-				console.log('data:', data)
+				// console.log('PostData:', data)
 				return o.getAll()
+			})
+		}
+
+		o.deleteCommentBeforePost = function(pid) {
+			return $http.delete('/comments/' + pid + '/deleteWithPost', {
+				headers: {
+					Authorization: 'Bearer ' + auth.getToken(),
+				},
+			}).success(function(data) {
+				// console.log('CommentData:', data)
+				return o.delete(pid)
 			})
 		}
 
@@ -363,7 +384,7 @@ app.factory('posts', ['$http', 'auth',
 					Authorization: 'Bearer ' + auth.getToken(),
 				},
 			}).success(function(data) {
-				console.log('data:', data)
+				// console.log('updatedata:', data)
 			})
 		}
 
@@ -398,27 +419,74 @@ app.factory('posts', ['$http', 'auth',
 	},
 ])
 
-app.controller('MainCtrl', ['$scope', 'posts', 'auth',
-	function($scope, posts, auth) {
-		// console.log('posts:', posts)
+app.factory('categories', ['$http', 'auth',
+	function($http, auth) {
+		const y = {
+			categories: [],
+		}
+
+		y.getAll = function() {
+			return $http.get('/categories').success(function(data) {
+				// console.log('category data:', data)
+				angular.copy(data, y.categories)
+			})
+		}
+
+		y.delete = function(id) {
+			// console.log('category._id:', id)
+			return $http.delete('/categories/' + id + '/delete', {
+				headers: {
+					Authorization: 'Bearer ' + auth.getToken(),
+				},
+			}).success(function(data) {
+				// console.log('data:', data)
+				return y.getAll()
+			})
+		}
+
+		y.create = function(category) {
+			return $http.post('/categories', category, {
+				headers: {
+					Authorization: 'Bearer ' + auth.getToken(),
+				},
+			}).success(function(data) {
+				y.categories.push(data)
+			})
+		}
+
+		return y
+	},
+])
+
+app.controller('MainCtrl', ['$scope', 'posts', 'auth', 'comments', 'categories',
+	function($scope, posts, auth, comments, categories) {
 		$scope.posts = posts.posts
 		$scope.isLoggedIn = auth.isLoggedIn
 
 		$scope.title = ''
+		$scope.categoriesList = categories.categories
+		$scope.contents = ''
+			// console.log('$scope.categoriesList:', $scope.categoriesList)
 
 		$scope.addPost = function() {
+			const editor = new wangEditor('editor-trigger')
+			console.log('editor:', editor)
+			const html = editor.txt.$txt.html()
 			if ($scope.title === '') {
 				return
 			}
+			// console.log('$scope.categories:', $scope.categories)
 			posts.create({
 				title: $scope.title,
 				link: $scope.link,
-				contents: $scope.contents,
+				contents: html,
+				categories: $scope.categories,
 			})
 
 			$scope.title = ''
 			$scope.link = ''
-			$scope.contents = ''
+			$scope.categories = ''
+			$scope.contents = editor.txt.$txt.html('<p><br></p>')
 		}
 
 		$scope.showPost = function(post) {
@@ -426,7 +494,7 @@ app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 		}
 
 		$scope.deletePost = function(post) {
-			posts.delete(post._id)
+			posts.deleteCommentBeforePost(post._id)
 		}
 
 		$scope.upvote = function(post) {
@@ -440,11 +508,13 @@ app.controller('MainCtrl', ['$scope', 'posts', 'auth',
 	},
 ])
 
-app.controller('PostsCtrl', ['$scope', '$state', 'posts', 'post', 'auth',
-	function($scope, $state, posts, post, auth) {
+app.controller('PostsCtrl', ['$scope', '$state', 'posts', 'post', 'auth', 'categories',
+	function($scope, $state, posts, post, auth, categories) {
 		$scope.posts = posts.posts
 		$scope.post = post
+		$scope.categoriesList = categories.categories
 		$scope.isLoggedIn = auth.isLoggedIn
+		$scope.myhtml = post.contents
 
 		$scope.addComment = function() {
 			if ($scope.body === '') {
@@ -460,10 +530,14 @@ app.controller('PostsCtrl', ['$scope', '$state', 'posts', 'post', 'auth',
 		}
 
 		$scope.updatePost = function() {
+			// console.log('$scope.post.categories:', $scope.post.categories)
+			const editor = new wangEditor('editor-update')
+			const html = editor.txt.$txt.html()
 			posts.update(post._id, {
 				title: $scope.post.title,
 				link: $scope.post.link,
-				contents: $scope.post.contents,
+				contents: html,
+				categories: $scope.post.categories
 			}).then(function() {
 				$state.go('plist')
 			})
@@ -501,25 +575,21 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth',
 	},
 ])
 
-app.controller('CommentCtrl', function($scope, commentPromise, auth, deleteComment) {
-	console.log('commentPromise:', commentPromise)
-	console.log('deleteComment:', deleteComment)
-	$scope.isLoggedIn = auth.isLoggedIn
-	$scope.comments = commentPromise.data
+app.controller('CommentCtrl', ['$scope', 'comments', 'auth',
+	function($scope, comments, auth) {
+		// console.log('comments:', comments)
+		$scope.isLoggedIn = auth.isLoggedIn
+		$scope.comments = comments.comments
 
-	// $scope.deleteComment = function(comment) {
-
-	// }
-})
-
-// app.controller('CommentCtrl', function($scope, commentPromise, auth) {
-// 	console.log('commentPromise:', commentPromise)
-// 	$scope.isLoggedIn = auth.isLoggedIn
-// })
+		$scope.deleteComment = function(comment) {
+			comments.delete(comment._id)
+		}
+	}
+])
 
 app.controller('UserCtrl', function($scope, users, auth, $state) {
 	$scope.users = users.data[0]
-	// console.log('$scope.users:', $scope.users)
+		// console.log('$scope.users:', $scope.users)
 	$scope.updateInfo = function() {
 		auth.update($scope.users._id, {
 			nickname: $scope.users.nickname,
@@ -570,25 +640,25 @@ app.controller('PwdCtrl', function($scope, auth, $state) {
 	}]
 
 	$scope.resetPwd = function() {
-		auth.resetPwd(vm).error(function(error) {
-			$scope.error = error
-		}).then(function(data) {
-			auth.logOut()
-			$state.go('login')
-		})
-	}
-	// $http.get('index.js').success(function(result) {
-	// 	vm.jsSource = result
-	// })
-	// $http.get('validate.form.html').success(function(result) {
-	// 	vm.htmlSource = result
-	// })
-	// $http.get('validate.form.html').success(function(result) {
-	// 	vm.htmlSource = result
-	// })
-	// $http.get('css/style.less').success(function(result) {
-	// 	vm.lessSource = result
-	// })
+			auth.resetPwd(vm).error(function(error) {
+				$scope.error = error
+			}).then(function(data) {
+				auth.logOut()
+				$state.go('login')
+			})
+		}
+		// $http.get('index.js').success(function(result) {
+		// 	vm.jsSource = result
+		// })
+		// $http.get('validate.form.html').success(function(result) {
+		// 	vm.htmlSource = result
+		// })
+		// $http.get('validate.form.html').success(function(result) {
+		// 	vm.htmlSource = result
+		// })
+		// $http.get('css/style.less').success(function(result) {
+		// 	vm.lessSource = result
+		// })
 })
 
 app.controller('NavCtrl', ['$scope', 'auth',
@@ -641,5 +711,85 @@ app.controller('toasterController', function($scope, toaster, $window) {
 
 	$scope.clear = function() {
 		toaster.clear()
+	}
+})
+
+app.controller('ModalDemoCtrl', function($uibModal, $log, $document, $scope, categories) {
+	var $ctrl = this
+	$scope.categories = categories.categories
+	$ctrl.animationsEnabled = true
+
+	$ctrl.open = function(size, parentSelector) {
+		var parentElem = parentSelector ?
+			angular.element($document[0].querySelector('.modal-demo ' + parentSelector)) : undefined
+		var modalInstance = $uibModal.open({
+			animation: $ctrl.animationsEnabled,
+			ariaLabelledBy: 'modal-title',
+			ariaDescribedBy: 'modal-body',
+			templateUrl: 'myModalContent.html',
+			controller: 'ModalInstanceCtrl',
+			controllerAs: '$ctrl',
+			size: size,
+			appendTo: parentElem,
+		})
+	}
+
+	$scope.deleteCategory = function(category) {
+		categories.delete(category._id)
+	}
+})
+
+app.controller('ModalInstanceCtrl', function($uibModalInstance, $scope, categories, auth) {
+	var $ctrl = this
+	$scope.isLoggedIn = auth.isLoggedIn
+
+	$ctrl.addCategory = function() {
+		categories.create({
+			name: $scope.categoryName,
+		})
+	}
+
+	$ctrl.ok = function() {
+		$uibModalInstance.close($ctrl.addCategory())
+	}
+
+	$ctrl.cancel = function() {
+		$uibModalInstance.dismiss('cancel')
+	}
+})
+
+app.directive('contenteditable', function() {
+	return {
+		restrict: 'A',
+		require: '?ngModel',
+		link: function(scope, element, attrs, ngModel) {
+			// 初始化 编辑器内容
+			if (!ngModel) {
+				return
+			} // do nothing if no ng-model
+			// Specify how UI should be updated
+			ngModel.$render = function() {
+				element.html(ngModel.$viewValue || '')
+			}
+			// Listen for change events to enable binding
+			element.on('blur keyup change', function() {
+				scope.$apply(readViewText)
+			})
+			// No need to initialize, AngularJS will initialize the text based on ng-model attribute
+			// Write data to the model
+			function readViewText() {
+				var html = element.html()
+				// When we clear the content editable the browser leaves a <br> behind
+				// If strip-br attribute is provided then we strip this out
+				if (attrs.stripBr && html === '<br>') {
+					html = ''
+				}
+				ngModel.$setViewValue(html)
+			}
+
+			// 创建编辑器
+			var editor = new wangEditor(element)
+			editor.create()
+		}
 	}
 })

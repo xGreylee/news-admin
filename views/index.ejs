@@ -5,6 +5,7 @@
   <link href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
   <link href="http://cdn.bootcss.com/angularjs-toaster/2.1.0/toaster.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/wangeditor/dist/css/wangEditor.min.css">
 
   <script src="http://cdn.bootcss.com/angular.js/1.5.10/angular.js"></script>
   <script src="http://cdn.bootcss.com/angular.js/1.5.10/angular-animate.js"></script>
@@ -16,6 +17,7 @@
   <script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.js"></script>
   <script src="http://cdn.bootcss.com/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.js"></script>
   <script src="http://cdn.bootcss.com/angularjs-toaster/2.1.0/toaster.js"></script>
+  <script type="text/javascript" src="/wangeditor/dist/js/wangEditor.js"></script>
 
   <script src="w5cValidator.js"></script>
   <script src="javascripts/angularApp.js"></script>
@@ -84,12 +86,8 @@
             <uib-accordion-heading>
               栏目信息管理 <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
             </uib-accordion-heading>
-            <span class="glyphicon glyphicon-tasks">
-              <a href="/#/" style="font-size:16px;text-align: center">新闻分类</a><br>
-            </span>
-            <hr>
             <span class="glyphicon glyphicon-menu-hamburger">
-              <a href="/#/" style="font-size:16px;text-align: center">栏目列表</a>
+              <a href="/#/categorylist" style="font-size:16px;text-align: center">栏目列表</a>
             </span>
           </div>
         </uib-accordion>
@@ -150,11 +148,44 @@
           来自 <a>{{comment.author}}</a>
         </span>
       </span>
-      <a class="glyphicon glyphicon-trash" ng-click=""></a>
+      <a class="glyphicon glyphicon-trash" ng-click="deleteComment(comment)"></a>
     </div>
 
     <div ng-hide="isLoggedIn()">
       <h3>您需要 <a href="/#/login">登录</a> 或者 <a href="/#/register">注册</a> 才有权限进行评论信息的管理</h3>
+    </div>
+  </script>
+
+  <script type="text/ng-template" id="myModalContent.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">添加类别</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <form name="add_category" ng-show="isLoggedIn()" ng-submit="$ctrl.addCategory()">
+        <div class="form-group">
+          <input type="text" name="category_name" class="form-control" placeholder="CategoryName" ng-model="categoryName" required>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()">OK</button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">Cancel</button>
+    </div>
+  </script>
+
+  <script type="text/ng-template" id="/categorylist.html">
+    <div class="page-header">
+      <h2>栏目列表</h2>
+    </div>
+
+    <button type="button" class="btn btn-primary btn-md" ng-click="$ctrl.open()">添加</button>
+    <div class="row" style="margin-top:10px;" ng-repeat="category in categories">
+      <span style="font-size:20px;margin-left:20px">
+        <a ng-show="category.name" href="">
+          {{category.name}}
+        </a>
+      </span>
+      <a class="glyphicon glyphicon-trash" ng-click="deleteCategory(category)"></a>
     </div>
   </script>
 
@@ -171,12 +202,23 @@
       </div>
 
       <div class="form-group">
-        <input type="text" class="form-control" placeholder="Link" ng-model="link">
+        <select class="form-control" ng-model="categories" ng-options="category.name for category in categoriesList">
+          <option value="">--- choose category ---</option>
+        </select>
       </div>
 
       <div class="form-group">
-        <textarea rows="20" cols="50" name="post_contents" ng-model="contents" required></textarea>
+        <input type="text" class="form-control" placeholder="Link" ng-model="link">
       </div>
+
+      <!-- <div class="form-group">
+        <textarea rows="20" cols="50" name="post_contents" ng-model="contents" required></textarea>
+      </div> -->
+
+      <textarea id="editor-trigger" ng-model="contents" contenteditable="true">
+      </textarea>
+      <hr>
+      <p ng-bind="contents"></p>
 
       <div ng-messages="add_form.post_contents.$error" style="color:red" role="alert">
         <div ng-message="required">新闻内容不能为空</div>
@@ -201,6 +243,12 @@
         <div class="col-sm-10" style="margin-bottom: 20px">
           <input type="text" class="form-control" ng-model="post.title"/>
         </div>
+        <label class="control-label col-sm-2" style="font-size:20px">类别:</label>
+        <div class="col-sm-10" style="margin-bottom: 20px">
+          <select class="form-control" ng-model="post.categories" ng-options="category.name for category in categoriesList">
+            <option value="">{{post.categories.name}}</option>
+          </select>
+        </div>
         <label class="control-label col-sm-2" style="font-size:20px">链接:</label>
         <div class="col-sm-10" style="margin-bottom: 16px">
           <input type="text" class="form-control" ng-model="post.link"/>
@@ -208,7 +256,10 @@
         <br><br>
         <label class="control-label col-sm-2" style="font-size:20px;padding-bottom: 20px;">内容:</label>
         <div class="col-sm-10" style="padding-top: 20px">
-          <textarea cols="50" rows="20" ng-model="post.contents"></textarea>
+          <textarea id="editor-update" ng-model="post.contents" contenteditable="true">
+          </textarea>
+          <hr>
+          <p ng-bind="post.contents"></p>
           <div ng-controller="toasterController">
             <toaster-container toaster-options="{'close-button':false, 'animation-class': 'toast-center-right', 'position-class': 'toast-top-full-width'}"></toaster-container>
             <button type="submit" style="float: right;" class="btn btn-primary" ng-click="pop()">修改</button>
@@ -217,16 +268,6 @@
         <br><br>
       </div>
     </form>
-    
-    <div ng-repeat="comment in post.comments | orderBy:'-upvotes'">
-      <span class="glyphicon glyphicon-thumbs-up" ng-click="upvote(comment)"></span>
-        {{comment.upvotes}} 
-      <span class="glyphicon glyphicon-thumbs-down" ng-click="downvote(comment)"></span>
-        - by {{comment.author}}
-      <span style="font-size:20px; margin-left:10px;">
-        {{comment.body}}
-      </span>
-    </div>
   </script>
   
   <script type="text/ng-template" id="/postDetail.html">
@@ -241,8 +282,8 @@
           <span style="float: right;font-size: 20px;">--作者：{{post.author}}</span>
         </h3>
       </div>
-      <div style="word-break: break-all;">
-        &nbsp;&nbsp;&nbsp;&nbsp;<span>{{post.contents}}</span>
+      <divstyle="word-break: break-all;">
+        <span ng-bind-html="myhtml"></span>
       </div>
     </div>
 

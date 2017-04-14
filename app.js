@@ -1,10 +1,9 @@
 const express = require('express')
 const path = require('path')
-// const favicon = require('serve-favicon')
+const favicon = require('serve-favicon')
 const logger = require('morgan')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
-
 const app = express()
 
 const mongoose = require('mongoose')
@@ -21,6 +20,7 @@ mongoose.connect('mongodb://localhost/news', function(err, db) {
 require('./models/Posts')
 require('./models/Comments')
 require('./models/Users')
+require('./models/Categories')
 require('./config/passport')
 
 const routes = require('./routes/index')
@@ -29,11 +29,11 @@ const users = require('./routes/users')
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 
-//app.use(favicon(__dirname + '/public/favicon.ico'))
+app.use(favicon(__dirname + '/public/favicon.ico'))
 app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
-	extended: false
+	extended: true
 }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))

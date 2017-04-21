@@ -640,13 +640,13 @@ app.controller('PwdCtrl', function($scope, auth, $state) {
 	}]
 
 	$scope.resetPwd = function() {
-			auth.resetPwd(vm).error(function(error) {
-				$scope.error = error
-			}).then(function(data) {
-				auth.logOut()
-				$state.go('login')
-			})
-		}
+		auth.resetPwd(vm).error(function(error) {
+			$scope.error = error
+		}).then(function(data) {
+			auth.logOut()
+			$state.go('login')
+		})
+	}
 		// $http.get('index.js').success(function(result) {
 		// 	vm.jsSource = result
 		// })

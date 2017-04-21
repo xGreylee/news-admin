@@ -105,6 +105,9 @@
     <div class="page-header">
       <h2>Welcome to News-Admin</h2>
     </div>
+    <div class="row" style="font-size: 25px;">
+      &nbsp;&nbsp;&nbsp;&nbsp;本系统选用的是MEAN框架，Angular首先接收用户在页面发出的请求，Express框架接收请求并将请求根据请求的URL来转发给Node，Node搭建的系统后台与Mongodb数据库进行交互，从mongodb读取数据或者提交数据到mongodb,mongodb返回数据给node，node再将数据格式转化为JSON并发送给Angular，让Angular渲染页面来完成此次用户的请求。当今社会新闻内容层出不穷，杂乱无章，极端负面，为博得点击率的新闻影响网民价值观以及道德观，需要有一个好的新闻后台系统来进行归类以及审核。
+    </div>
   </script>
 
   <script type="text/ng-template" id="/plist.html">
@@ -211,11 +214,7 @@
         <input type="text" class="form-control" placeholder="Link" ng-model="link">
       </div>
 
-      <!-- <div class="form-group">
-        <textarea rows="20" cols="50" name="post_contents" ng-model="contents" required></textarea>
-      </div> -->
-
-      <textarea id="editor-trigger" ng-model="contents" contenteditable="true">
+      <textarea id="editor-trigger" name="post_contents" ng-model="contents" contenteditable="true">
       </textarea>
       <hr>
       <p ng-bind="contents"></p>

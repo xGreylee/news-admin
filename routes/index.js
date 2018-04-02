@@ -14,9 +14,9 @@ const Category = mongoose.model('Category')
 
 const auth = jwt({
 	secret: 'SECRET',
-	userProperty: 'payload'
+	requestProperty: 'payload'
 })
-const uploadfoldername = 'uploadImg'
+const uploadfoldername = 'uploadimg'
 const uploadfolderpath = path.join(__dirname, '../public/uploadimg')
 console.log('uploadfolderpath:', uploadfolderpath)
 
@@ -24,7 +24,7 @@ router.get('/', function(req, res) {
 	res.render('index')
 })
 
-router.post('/uploadImg', function(req, res, next) {
+router.post('/uploadimg', function(req, res, next) {
 	var form = new formidable.IncomingForm()
 	form.parse(req, function(err, fields, files) {
 		// console.log('files:', files)
